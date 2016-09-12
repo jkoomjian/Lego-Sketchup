@@ -2,7 +2,7 @@
   box-sizing: border-box; }
 
 html {
-  font-size: 39.6px; }
+  font-size: 2.475vw; }
 
 body {
   margin: 0; }
@@ -17,7 +17,7 @@ body {
     top: 0;
     left: calc(50% - 12.5rem);
     width: 25rem;
-    height: 25rem;
+    height: 20rem;
     perspective: 2000px;
     perspective-origin: 60% top;
     transform-style: preserve-3d; }
@@ -168,7 +168,8 @@ body {
 
 #controls {
   font-size: 16px;
-  z-index: 10; }
+  z-index: 10;
+  margin-bottom: 3em; }
   #controls legend {
     font-weight: bold;
     font-size: larger;

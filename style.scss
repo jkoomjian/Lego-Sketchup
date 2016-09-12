@@ -9,7 +9,8 @@ $lego-purple: #f34ed0;
 
 // Units
 $normal-font-size: 16px;
-$rem: 39.6px;
+// $rem: 39.6px;
+$rem: 2.475vw;
 $lego-space-side: 25rem;
 
 @mixin lego-pile($lego-color) {
@@ -27,7 +28,7 @@ body {margin: 0;}
 
   #lego-space {
     position: absolute; top: 0; left: calc(50% - #{$lego-space-side / 2});
-    width: $lego-space-side; height: $lego-space-side;
+    width: $lego-space-side; height: $lego-space-side - 5rem;
     perspective: 2000px;
     perspective-origin: 60% top;
     transform-style:preserve-3d;
@@ -138,7 +139,7 @@ body {margin: 0;}
 #controls {
   @extend %details;
   font-size: $normal-font-size;
-  z-index: 10;
+  z-index: 10; margin-bottom: 3em;
 
   legend {font-weight: bold; font-size: larger; padding-left: .7em; padding-right: .7em;}
   .instructions {
