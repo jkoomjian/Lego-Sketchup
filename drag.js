@@ -1,20 +1,20 @@
 var lego;
-function onDragStart(e) {
+function onDragStart(event) {
   console.log("start drag!");
   //create a new lego
   lego = new Lego(event.target, event.clientX, event.clientY)
-  _onDragStartCommon(e);
+  _onDragStartCommon(event);
 }
 
-function onDragStartExistingLego(e) {
+function onDragStartExistingLego(event) {
   console.log("start drag w/existing lego!");
   lego = event.target.legoObj;
-  _onDragStartCommon(e);
+  _onDragStartCommon(event);
 }
 
-function _onDragStartCommon(e) {
-  e.dataTransfer.dropEffect = "copy";
-  e.dataTransfer.setDragImage($("#empty"), 0, 0);
+function _onDragStartCommon(event) {
+  event.dataTransfer.dropEffect = "copy";
+  event.dataTransfer.setDragImage($("#empty"), 0, 0);
 }
 
 function onDrag(event) {
@@ -26,7 +26,7 @@ function onDrag(event) {
   });
 }
 
-function onDragEnd(e) {
+function onDragEnd(event) {
   console.log("at drag end");
   lego.place();
 }
