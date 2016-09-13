@@ -7,14 +7,22 @@ class MousePath {
     this.isInitialDrag = true;
   }
 
+  // returns lr or tb, depending if the orientation is primarily left-right or up-down
+  static getAxisOrientation(axis) {
+    var axisElem = $(`.axis-${axis}`);
+    let rect = axisElem.getBoundingClientRect();
+    let angle = calculateAngle(rect.right - rect.left, rect.bottom - rect.top);
+    console.log("angle: " + angle);
+    return (angle > 45) ? 'tb' : 'lr';
+  }
+
   // Try to figure out which axis the user is moving the lego along
   // this is done by getting the angle of movement of the mouse,
   // the angles of the 3 axes, and returning the axis with the angle
   // closest to the mouse movement
-  getAxesClosestsToMovement(eventX, eventY) {
+  getAxisClosestsToMovement(eventX, eventY) {
 
     let mouseAngle = calculateAngle(eventX - this.lastClientX, eventY - this.lastClientY);
-    // console.log(`mouse angle: ${mouseAngle} eventY: ${eventY} lastY: ${this.lastClientY} eventX: ${eventX} lastX: ${this.lastClientX}`);
     let closest = [];
 
     //get the axis angles
@@ -30,25 +38,23 @@ class MousePath {
       return a[2] - b[2];
     });
 
-    var log = `mouse angle: ${mouseAngle} -> ${Math.abs(eventX - this.lastClientX)} x ${Math.abs(eventY - this.lastClientY)}\n`;
-    closest.forEach( e => {log += `${e[0]}: ${e[1]}\n`});
-    console.log(log);
+    // var log = `mouse angle: ${mouseAngle} -> ${Math.abs(eventX - this.lastClientX)} x ${Math.abs(eventY - this.lastClientY)}\n`;
+    // closest.forEach( e => {log += `${e[0]}: ${e[1]}\n`});
+    // console.log(log);
 
     return closest.map( ar => {return ar[0]})[0];
   }
 
   onDragGetAxes(eventX, eventY) {
-    var axis = this.isInitialDrag ? ['x','z'] : this.getAxesClosestsToMovement(eventX, eventY);
+    var axis = this.isInitialDrag ? ['x','z'] : this.getAxisClosestsToMovement(eventX, eventY);
 
     //update last xy
     this.lastClientX = eventX;
     this.lastClientY = eventY;
-
     this.isInitialDrag = false;
 
     return axis;
   }
-
 }
 
 class Lego {
@@ -70,6 +76,7 @@ class Lego {
   }
 
   drag(eventX, eventY) {
+    //console.log("event: " + eventX + " " + eventY);
     var xPlaneRect = $(".plane-x").getBoundingClientRect();
     // console.log(`drag x:${eventX} y:${eventY} lego x:${this.elem.style.left} y:${this.elem.style.top}`);
 
@@ -83,38 +90,43 @@ class Lego {
     if (axis.includes('z')) {
       // yHieght = the height above the floor the lego is
       // adding yHeight to eventY will give the y coord as if the lego was on the plane
-      var yPlaneTop = $(`.plane-y .row-${this.zPlaneHeight}`).getBoundingClientRect().top;
-      var yPlaneBottom = $(`.plane-y .row-0`).getBoundingClientRect().top;
-      var yHeight =  Math.floor(yPlaneBottom - yPlaneTop);
-      var legoYxy; // y dimension in the xy plane (not the x plane the block rests on)
-      if (eventY + yHeight < xPlaneRect.top) {
-        legoYxy = "9";
-      } else if (eventY + yHeight > xPlaneRect.bottom){
-        legoYxy = "0";
-      } else {
-        legoYxy = (eventY + yHeight - xPlaneRect.top) / (xPlaneRect.bottom - xPlaneRect.top);
-        legoYxy = 9 - Math.floor(legoYxy * 10);
-      }
+      // var yPlaneTop = $(`.plane-y .row-${this.zPlaneHeight}`).getBoundingClientRect().top;
+      // var yPlaneBottom = $(`.plane-y .row-0`).getBoundingClientRect().top;
+      // var yHeight =  Math.floor(yPlaneBottom - yPlaneTop);
+      // var legoYxy; // y dimension in the xy plane (not the x plane the block rests on)
+      // if (eventY + yHeight < xPlaneRect.top) {
+      //   legoYxy = "9";
+      // } else if (eventY + yHeight > xPlaneRect.bottom){
+      //   legoYxy = "0";
+      // } else {
+      //   legoYxy = (eventY + yHeight - xPlaneRect.top) / (xPlaneRect.bottom - xPlaneRect.top);
+      //   legoYxy = 9 - Math.floor(legoYxy * 10);
+      // }
 
-      this.zPlaneRow = 9 - legoYxy;
+      let coord = this.getCoordForAxis('z', eventX, eventY, "top");
+      this.zPlaneRow = 9 - coord;
       styleProp = "top";
-      style = legoYxy + "rem";
+      style = coord + "rem";
+      console.log("coord: " + coord);
     }
 
     // X
     if (axis.includes('x')) {
-      var legoXxy;
-      if (eventX < xPlaneRect.left) {
-        legoXxy = "0";
-      } else if (eventX > xPlaneRect.right){
-        legoXxy = "9";
-      } else {
-        legoXxy = (eventX - xPlaneRect.left) / (xPlaneRect.right - xPlaneRect.left);
-        legoXxy = Math.floor(legoXxy * 10);
-      }
-      this.zPlaneCell = legoXxy;
+      // var legoXxy;
+      // if (eventX < xPlaneRect.left) {
+      //   legoXxy = "0";
+      // } else if (eventX > xPlaneRect.right){
+      //   legoXxy = "9";
+      // } else {
+      //   legoXxy = (eventX - xPlaneRect.left) / (xPlaneRect.right - xPlaneRect.left);
+      //   legoXxy = Math.floor(legoXxy * 10);
+      // }
+
+      let coord = this.getCoordForAxis('x', eventX, eventY, "left");
+
+      this.zPlaneCell = coord;
       styleProp = "left";
-      style = legoXxy + "rem";
+      style = coord + "rem";
     }
 
     // Y
@@ -140,27 +152,116 @@ class Lego {
       style = `translateZ(${legoZxy * -1}rem)`;
     }
 
-    console.log(`coords: ${this.zPlaneCell}, ${this.zPlaneRow}`);
-    if (this.isCollision()) {
-      console.log("collision!");
-    } else {
+    // console.log(`coords: ${this.zPlaneCell}, ${this.zPlaneRow}`);
+    // if (this.isCollision()) {
+      // console.log("collision!");
+    // } else {
       this.elem.style[styleProp] = style;
       $$('.plane-x .cell.active').forEach( cell => {cell.className = cell.className.replace("active", "");});
       $(`.plane-x .row-${this.zPlaneRow} .cell-${this.zPlaneCell}`).className += " active";
+    // }
+  }
+
+  // Given the axis and mouse pos., get the coordinate the lego should be placed at for the given axis
+  getCoordForAxis(axis, eventXScreen, eventYScreen, positioningProperty) {
+    // vars ending in Screen are on the screen (xy) coordinate system
+    // vars ending in Plane are along the plane's coordinate system
+    var startEdgeScreen, endEdgeScreen, mousePosScreen,startEdgePositioning;
+    // var planeRectScreen = $(`.plane-${axis}`).getBoundingClientRect();
+    var xPlaneRectScreen = $(`.plane-x`).getBoundingClientRect();
+    var orientation = MousePath.getAxisOrientation(axis);
+    console.log("orientation: " + orientation);
+
+    if (orientation == 'lr') {
+      startEdgeScreen = xPlaneRectScreen.left;
+      endEdgeScreen = xPlaneRectScreen.right;
+      mousePosScreen = eventXScreen;
+      startEdgePositioning = 'left';
+    } else {
+      startEdgeScreen = xPlaneRectScreen.top;
+      endEdgeScreen = xPlaneRectScreen.bottom;
+      mousePosScreen = eventYScreen;
+      startEdgePositioning = 'top';
     }
+
+    var reverse = this._shouldReverse('.plane-x', startEdgeScreen, startEdgePositioning, positioningProperty)
+
+    // If reverse, then 9 is the start coord, and 0 is the end coord
+    var startEdgePlane = 0, endEdgePlane = 9;
+    if (reverse) {
+      // awesome!
+      [startEdgePlane, endEdgePlane] = [endEdgePlane, startEdgePlane];
+    }
+
+    // width of the axis on the plane, on the screen (in the given orienataion)
+    var planeWidthScreen = endEdgeScreen - startEdgeScreen;
+    var mouseDistFromStartEdgeScreen = mousePosScreen - startEdgeScreen;
+    var coordOnAxis;
+    if (mousePosScreen < startEdgeScreen) {
+      coordOnAxis = startEdgePlane;
+    } else if (mousePosScreen > endEdgeScreen){
+      coordOnAxis = endEdgePlane;
+    } else {
+      coordOnAxis = mouseDistFromStartEdgeScreen / planeWidthScreen;
+      coordOnAxis = Math.floor(coordOnAxis * 10);
+      if (reverse) coordOnAxis = startEdgePlane - coordOnAxis;
+    }
+
+    return coordOnAxis;
+  }
+
+  // When the coordinate plane start (top/left) and the startEdgeScreen are not on the same
+  // the coordinates have to reversed (0 becomes 9, 9 becomes 0)
+  // startEdge - px value of the startEdge
+  // startEdgePos - the position property used (left or top)
+  // positioningProperty - the style the plane uses to place the lego (top or left)
+  _shouldReverse(planeId, startEdge, startEdgePos, positioningProperty) {
+    // To figure out if startEdgeScreen is the same edge as the plane starting edge:
+    var planeElem = $(planeId);
+
+    // place a 1x100% div at the top of the plane (plane coords)
+    var styles = {position: 'absolute', top: '0', left: '0'};
+    if (positioningProperty == "top") {
+      styles['height'] = '1px';
+      styles['width'] = '100%';
+    } else {
+      styles['width'] = '1px';
+      styles['height'] = '100%';
+    }
+
+    var div = document.createElement("div");
+    div.css(styles);
+    planeElem.appendChild(div);
+
+    //getRect on the div (screen coords)
+    var divRectScreen = div.getBoundingClientRect();
+
+    //get the startEdgePos property of getRect
+    var divStartEdge = divRectScreen[startEdgePos];
+
+    //it should match startEdge - if within 50px probably the same edge
+    var diff = Math.abs(divStartEdge - startEdge);
+    div.remove();
+
+    return diff > 50;
   }
 
   place() {
-    var landingCell = $(`.plane-x .row-${this.zPlaneRow} .cell-${this.zPlaneCell}`)
-    var currStackSize = landingCell['currStackSize'] || 0;
+    try {
+      var landingCell = $(`.plane-x .row-${this.zPlaneRow} .cell-${this.zPlaneCell}`)
+      var currStackSize = landingCell['currStackSize'] || 0;
 
-    landingCell['currStackSize'] = currStackSize + 1;
-    lego.elem.style.transform = `translateZ(${currStackSize * -1}rem)`;
+      landingCell['currStackSize'] = currStackSize + 1;
+      lego.elem.style.transform = `translateZ(${currStackSize * -1}rem)`;
 
-    this.elem.legoObj = this;
-    this.elem.addEventListener("dragstart", onDragStartExistingLego);
-    this.elem.addEventListener("drag", onDrag);
-    this.elem.addEventListener("dragend", onDragEnd);
+      this.elem.legoObj = this;
+      this.elem.addEventListener("dragstart", onDragStartExistingLego);
+      this.elem.addEventListener("drag", onDrag);
+      this.elem.addEventListener("dragend", onDragEnd);
+    } catch(ex) {
+      console.log("looing for " + `.plane-x .row-${this.zPlaneRow} .cell-${this.zPlaneCell}`);
+      consoel.err(ex);
+    }
   }
 
   isCollision() {

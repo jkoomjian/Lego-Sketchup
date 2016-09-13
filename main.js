@@ -16,8 +16,13 @@ HTMLElement.prototype.appendNChildren = function(numElems, className, reverseNum
   });
 }
 
+HTMLElement.prototype.css = function(map) {
+  Object.keys(map).forEach( key => {
+    this.style[key] = map[key];
+  });
+}
+
 if (!Array.prototype['includes']) {
-  debugger;
   Array.prototype.includes = function(e) {
     return this.indexOf(e) >= 0;
   }
