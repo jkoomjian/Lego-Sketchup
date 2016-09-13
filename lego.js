@@ -60,9 +60,9 @@ class MousePath {
 class Lego {
 
   constructor(sourceLegoPile, startClientX, startClientY) {
-    this.zPlaneCell = 0;
-    this.zPlaneRow = 0;
-    this.zPlaneHeight = 0;
+    this.xPlaneRow = 0;
+    this.xPlaneCell = 0;
+    this.xPlaneHeight = 0;
 
     this.mousePath = new MousePath(startClientX, startClientY);
 
@@ -76,10 +76,22 @@ class Lego {
   }
 
   getCell() {
-    return $(`.plane-x .row-${this.zPlaneRow} .cell-${this.zPlaneCell}`);
+    return $(`.plane-x .row-${this.xPlaneRow} .cell-${this.xPlaneCell}`);
   }
 
   drag(eventX, eventY) {
+
+    function updateLocation(styleProp, styleVal, coord) {
+      if (this.isCollision()) {
+        console.log("collision!");
+      } else {
+        this.elem.style[styleProp] = styleVal;
+        $$('.plane-x .cell.active').forEach( cell => {cell.className = cell.className.replace("active", "");});
+        this.getCell().className += " active";
+        console.log(`drag ${coord}rem ${styleProp}`);
+      }
+    }
+
     //console.log("event: " + eventX + " " + eventY);
     var xPlaneRect = $(".plane-x").getBoundingClientRect();
     // console.log(`drag x:${eventX} y:${eventY} lego x:${this.elem.style.left} y:${this.elem.style.top}`);
@@ -94,7 +106,7 @@ class Lego {
     if (axis.includes('z')) {
       // yHieght = the height above the floor the lego is
       // adding yHeight to eventY will give the y coord as if the lego was on the plane
-      // var yPlaneTop = $(`.plane-y .row-${this.zPlaneHeight}`).getBoundingClientRect().top;
+      // var yPlaneTop = $(`.plane-y .row-${this.xPlaneHeight}`).getBoundingClientRect().top;
       // var yPlaneBottom = $(`.plane-y .row-0`).getBoundingClientRect().top;
       // var yHeight =  Math.floor(yPlaneBottom - yPlaneTop);
       // var legoYxy; // y dimension in the xy plane (not the x plane the block rests on)
@@ -108,10 +120,8 @@ class Lego {
       // }
 
       let coord = this.getCoordForAxis('z', eventX, eventY, "top");
-      this.zPlaneRow = 9 - coord;
-      styleProp = "top";
-      style = coord + "rem";
-      console.log("coord: " + coord);
+      this.xPlaneRow = 9 - coord;
+      updateLocation("top", coord + "rem", coord);
     }
 
     // X
@@ -127,16 +137,14 @@ class Lego {
       // }
 
       let coord = this.getCoordForAxis('x', eventX, eventY, "left");
-
-      this.zPlaneCell = coord;
-      styleProp = "left";
-      style = coord + "rem";
+      this.xPlaneCell = coord;
+      updateLocation("left", coord + "rem", coord);
     }
 
-    // Y
+    // Y //TODO update this to use getCoordForAxis
     if (axis.includes('y')) {
       var yPlaneRect = $(".plane-y").getBoundingClientRect();
-      var xPlaneCell = $(`.plane-x .row-${this.zPlaneRow} .cell-${this.zPlaneCell}`);
+      var xPlaneCell = this.getCell();
       var xPlaneCellBottom = xPlaneCell.getBoundingClientRect().bottom;
       var yPlaneHeight = yPlaneRect.bottom - yPlaneRect.top;
 
@@ -151,19 +159,11 @@ class Lego {
       }
 
       // console.log(`y axis: ${legoZxy} cellBottom: ${xPlaneCellBottom} eventY: ${eventY}`);
-      this.zPlaneHeight = legoZxy;
-      styleProp = "transform";
-      style = `translateZ(${legoZxy * -1}rem)`;
+      this.xPlaneHeight = legoZxy;
+      updateLocation("transform", `translateZ(${legoZxy * -1}rem)`, legoZxy * -1);
     }
 
-    // console.log(`coords: ${this.zPlaneCell}, ${this.zPlaneRow}`);
-    if (this.isCollision()) {
-      console.log("collision!");
-    } else {
-      this.elem.style[styleProp] = style;
-      $$('.plane-x .cell.active').forEach( cell => {cell.className = cell.className.replace("active", "");});
-      $(`.plane-x .row-${this.zPlaneRow} .cell-${this.zPlaneCell}`).className += " active";
-    }
+    // console.log(`coords: ${this.xPlaneCell}, ${this.xPlaneRow}`);
   }
 
   // Given the axis and mouse pos., get the coordinate the lego should be placed at for the given axis
@@ -175,6 +175,16 @@ class Lego {
     var xPlaneRectScreen = $(`.plane-x`).getBoundingClientRect();
     var orientation = MousePath.getAxisOrientation(axis);
     console.log("orientation: " + orientation);
+
+    // yHieght = the height above the floor the lego is
+    // adding yHeight to eventY will give the y coord as if the lego was on the plane
+    // TODO this is probably broken
+    var yHeight = 0;
+    // if (axis == 'y' && orienataion == 'tb') {
+    //   let yPlaneTop = $(`.plane-y .row-${this.xPlaneHeight}`).getBoundingClientRect().top;
+    //   let yPlaneBottom = $(`.plane-y .row-0`).getBoundingClientRect().top;
+    //   yHeight =  Math.floor(yPlaneBottom - yPlaneTop);
+    // }
 
     if (orientation == 'lr') {
       startEdgeScreen = xPlaneRectScreen.left;
@@ -193,7 +203,6 @@ class Lego {
     // If reverse, then 9 is the start coord, and 0 is the end coord
     var startEdgePlane = 0, endEdgePlane = 9;
     if (reverse) {
-      // awesome!
       [startEdgePlane, endEdgePlane] = [endEdgePlane, startEdgePlane];
     }
 
@@ -201,12 +210,12 @@ class Lego {
     var planeWidthScreen = endEdgeScreen - startEdgeScreen;
     var mouseDistFromStartEdgeScreen = mousePosScreen - startEdgeScreen;
     var coordOnAxis;
-    if (mousePosScreen < startEdgeScreen) {
+    if (mousePosScreen + yHeight < startEdgeScreen) {
       coordOnAxis = startEdgePlane;
-    } else if (mousePosScreen > endEdgeScreen){
+    } else if (mousePosScreen + yHeight > endEdgeScreen){
       coordOnAxis = endEdgePlane;
     } else {
-      coordOnAxis = mouseDistFromStartEdgeScreen / planeWidthScreen;
+      coordOnAxis = (mouseDistFromStartEdgeScreen + yHeight) / planeWidthScreen;
       coordOnAxis = Math.floor(coordOnAxis * 10);
       if (reverse) coordOnAxis = startEdgePlane - coordOnAxis;
     }
@@ -263,7 +272,7 @@ class Lego {
       this.elem.addEventListener("drag", onDrag);
       this.elem.addEventListener("dragend", onDragEnd);
     } catch(ex) {
-      console.log("looing for " + `.plane-x .row-${this.zPlaneRow} .cell-${this.zPlaneCell}`);
+      console.log("looing for " + `.plane-x .row-${this.xPlaneRow} .cell-${this.xPlaneCell}`);
       consoel.err(ex);
     }
   }
@@ -278,7 +287,7 @@ class Lego {
   isCollision() {
     var landingCell = this.getCell();
     var currStackSize = landingCell['currStackSize'] || 0;
-    return (currStackSize > this.zPlaneHeight);
+    return (currStackSize > this.xPlaneHeight);
   }
 
 }
