@@ -80,7 +80,7 @@ class Lego {
 
     //set the color
     var color = sourceLegoPile.className.split(" ")[1]
-    this.elem.className += " " + color;
+      this.elem.className += " " + color;
   }
 
   getCell() {
@@ -110,24 +110,10 @@ class Lego {
 
     // can only move [y] or [x,z] dimensions at a time!
     var axis = this.mousePath.onDragGetAxes(eventX, eventY);
-    console.log(`axes to update: ${axis}`);
+    // console.log(`axes to update: ${axis}`);
 
     // Z
     if (axis.includes('z')) {
-      // yHieght = the height above the floor the lego is
-      // adding yHeight to eventY will give the y coord as if the lego was on the plane
-      // var yPlaneTop = $(`.plane-y .row-${this.xPlaneHeight}`).getBoundingClientRect().top;
-      // var yPlaneBottom = $(`.plane-y .row-0`).getBoundingClientRect().top;
-      // var yHeight =  Math.floor(yPlaneBottom - yPlaneTop);
-      // var legoYxy; // y dimension in the xy plane (not the x plane the block rests on)
-      // if (eventY + yHeight < xPlaneRect.top) {
-      //   legoYxy = "9";
-      // } else if (eventY + yHeight > xPlaneRect.bottom){
-      //   legoYxy = "0";
-      // } else {
-      //   legoYxy = (eventY + yHeight - xPlaneRect.top) / (xPlaneRect.bottom - xPlaneRect.top);
-      //   legoYxy = 9 - Math.floor(legoYxy * 10);
-      // }
       coord = this.getCoordForAxis('z', eventX, eventY, "top");
       this.xPlaneRow = 9 - coord;
       updateLocation("top", coord + "rem", coord);
@@ -135,16 +121,6 @@ class Lego {
 
     // X
     if (axis.includes('x')) {
-      // var legoXxy;
-      // if (eventX < xPlaneRect.left) {
-      //   legoXxy = "0";
-      // } else if (eventX > xPlaneRect.right){
-      //   legoXxy = "9";
-      // } else {
-      //   legoXxy = (eventX - xPlaneRect.left) / (xPlaneRect.right - xPlaneRect.left);
-      //   legoXxy = Math.floor(legoXxy * 10);
-      // }
-
       coord = this.getCoordForAxis('x', eventX, eventY, "left");
       this.xPlaneCell = coord;
       updateLocation("left", coord + "rem", coord);
@@ -173,6 +149,52 @@ class Lego {
     }
 
     // console.log(`coords: ${this.xPlaneCell}, ${this.xPlaneRow}`);
+  }
+
+  getCoordForAxis2(axis, eventXScreen, eventYScreen, positioningProperty) {
+    var startCellPlane, endCellPlane, startEdgePositioning;
+    console.log("axis: " + axis);
+
+    // Get the cells at the start and end of the line the lego is moving along
+    if (axis == "z") {
+      startCellPlane = $(`.plane-x .row-0 .cell-${this.xPlaneCell}`);
+      endCellPlane = $(`.plane-x .row-9 .cell-${this.xPlaneCell}`);
+    } else {
+      startCellPlane = $(`.plane-x .row-${this.xPlaneRow} .cell-0`);
+      endCellPlane = $(`.plane-x .row-${this.xPlaneRow} .cell-9`);
+    }
+
+    var orientation = MousePath.getAxisOrientation(axis);
+    startEdgePositioning = orientation == 'lr' ? 'left' : 'top';
+
+    // Calculate the distance of the line, from start to finish
+    var startCellRect = startCellPlane.getBoundingClientRect();
+    var endCellRect = endCellPlane.getBoundingClientRect();
+    //assumes plane is not rotated 180deg
+    var totalLineDist = calcDistance(startCellRect.left, startCellRect.top, endCellRect.right, endCellRect.bottom)
+
+    // Calculate distance between end and mouse coords
+    var partialLineDist = calcDistance(eventXScreen, eventYScreen, startCellRect.left, startCellRect.top);
+    var coordDist = partialLineDist / totalLineDist;
+    coordDist = Math.floor(coordDist * 10);
+
+    if (coordDist < 0) coordDist = 0;
+    if (coordDist > 9) coordDist = 9;
+
+    var reverse = this._shouldReverse('.plane-x', startCellRect[startEdgePositioning], startEdgePositioning, positioningProperty)
+    if (reverse) coordDist = 9 - coordDist;
+
+    return coordDist;
+    // if (mousePosScreen + yHeight < startEdgeScreen) {
+    //   coordOnAxis = startEdgePlane;
+    // } else if (mousePosScreen + yHeight > endEdgeScreen){
+    //   coordOnAxis = endEdgePlane;
+    // } else {
+    //   coordOnAxis = (mouseDistFromStartEdgeScreen + yHeight) / planeWidthScreen;
+    //   coordOnAxis = Math.floor(coordOnAxis * 10);
+    //   if (reverse) coordOnAxis = startEdgePlane - coordOnAxis;
+    // }
+
   }
 
   // Given the axis and mouse pos., get the coordinate the lego should be placed at for the given axis

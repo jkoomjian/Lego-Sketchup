@@ -52,6 +52,12 @@ function executeOnGreatEnoughChange(x, y, minPointerDifference, name, callback) 
   }
 }
 
+function calcDistance(startX, startY, endX, endY) {
+  var xDist = Math.abs(endX - startX);
+  var yDist = Math.abs(endY - startY);
+  return Math.floor(Math.sqrt(Math.pow(xDist, 2) + Math.pow(yDist, 2)));
+}
+
 // return the angle, between 0-90
 function calculateAngle(xDist, yDist) {
   const rad2deg = 180/Math.PI;

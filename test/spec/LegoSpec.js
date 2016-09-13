@@ -23,3 +23,9 @@ describe("Transform class", function() {
   });
 
 });
+
+describe("Utils", function() {
+  it("should calculate distance", function() {
+    expect( calcDistance(645, 270, 672, 96) ).toEqual( 176 );
+  });
+});
