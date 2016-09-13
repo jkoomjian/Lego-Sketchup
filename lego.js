@@ -46,7 +46,14 @@ class MousePath {
   }
 
   onDragGetAxes(eventX, eventY) {
-    var axis = this.isInitialDrag ? ['x','z'] : this.getAxisClosestsToMovement(eventX, eventY);
+    var axis = this.getAxisClosestsToMovement(eventX, eventY);
+    //x,z can be updated at the same time
+    //y only updated by itself for now
+    if (axis[0] == 'y' && !this.isInitialDrag) {
+      axis = ['y'];
+    } else {
+      axis = ['x','z']
+    }
 
     //update last xy
     this.lastClientX = eventX;
@@ -64,6 +71,7 @@ class Lego {
     this.xPlaneCell = 0;
     this.xPlaneHeight = 0;
 
+    this.offsetY = 0;
     this.mousePath = new MousePath(startClientX, startClientY);
 
     var legoTemplate = $("#lego-template")
@@ -80,14 +88,16 @@ class Lego {
   }
 
   drag(eventX, eventY) {
+    eventY += this.offsetY;
 
+    var that = this;
     function updateLocation(styleProp, styleVal, coord) {
-      if (this.isCollision()) {
+      if (that.isCollision()) {
         console.log("collision!");
       } else {
-        this.elem.style[styleProp] = styleVal;
+        that.elem.style[styleProp] = styleVal;
         $$('.plane-x .cell.active').forEach( cell => {cell.className = cell.className.replace("active", "");});
-        this.getCell().className += " active";
+        that.getCell().className += " active";
         console.log(`drag ${coord}rem ${styleProp}`);
       }
     }
@@ -96,9 +106,9 @@ class Lego {
     var xPlaneRect = $(".plane-x").getBoundingClientRect();
     // console.log(`drag x:${eventX} y:${eventY} lego x:${this.elem.style.left} y:${this.elem.style.top}`);
 
-    var styleProp, style;
+    var styleProp, style, coord;
 
-    // can only move 1 dimension at a time!
+    // can only move [y] or [x,z] dimensions at a time!
     var axis = this.mousePath.onDragGetAxes(eventX, eventY);
     console.log(`axes to update: ${axis}`);
 
@@ -118,8 +128,7 @@ class Lego {
       //   legoYxy = (eventY + yHeight - xPlaneRect.top) / (xPlaneRect.bottom - xPlaneRect.top);
       //   legoYxy = 9 - Math.floor(legoYxy * 10);
       // }
-
-      let coord = this.getCoordForAxis('z', eventX, eventY, "top");
+      coord = this.getCoordForAxis('z', eventX, eventY, "top");
       this.xPlaneRow = 9 - coord;
       updateLocation("top", coord + "rem", coord);
     }
@@ -136,7 +145,7 @@ class Lego {
       //   legoXxy = Math.floor(legoXxy * 10);
       // }
 
-      let coord = this.getCoordForAxis('x', eventX, eventY, "left");
+      coord = this.getCoordForAxis('x', eventX, eventY, "left");
       this.xPlaneCell = coord;
       updateLocation("left", coord + "rem", coord);
     }
@@ -174,7 +183,7 @@ class Lego {
     // var planeRectScreen = $(`.plane-${axis}`).getBoundingClientRect();
     var xPlaneRectScreen = $(`.plane-x`).getBoundingClientRect();
     var orientation = MousePath.getAxisOrientation(axis);
-    console.log("orientation: " + orientation);
+    console.log("orientation: " + orientation + " eventX: " + eventXScreen + " eventY: " + eventYScreen);
 
     // yHieght = the height above the floor the lego is
     // adding yHeight to eventY will give the y coord as if the lego was on the plane

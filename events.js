@@ -138,6 +138,10 @@ function wheelMove(event) {
   event.preventDefault();
 }
 
+function onMouseOver(event) {
+  event.target.style.backgroundColor = "yellow";
+}
+
 //---------- Assign Event Handlers ------------
 function initEventHandlers() {
   window.addEventListener("keydown", keyDown);
@@ -147,4 +151,5 @@ function initEventHandlers() {
   window.addEventListener("mousemove", mouseMove);
   $("#lego-space").addEventListener("wheel", wheelMove);
   initializeDrag();
+  // addHandlers(".plane-x .cell", "mouseover", onMouseOver);
 }
