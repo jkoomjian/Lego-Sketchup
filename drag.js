@@ -9,6 +9,7 @@ function onDragStart(event) {
 function onDragStartExistingLego(event) {
   console.log("start drag w/existing lego!");
   lego = event.target.legoObj;
+  lego.unplace();
   _onDragStartCommon(event);
 }
 

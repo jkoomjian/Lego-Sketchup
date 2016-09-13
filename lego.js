@@ -75,6 +75,10 @@ class Lego {
     this.elem.className += " " + color;
   }
 
+  getCell() {
+    return $(`.plane-x .row-${this.zPlaneRow} .cell-${this.zPlaneCell}`);
+  }
+
   drag(eventX, eventY) {
     //console.log("event: " + eventX + " " + eventY);
     var xPlaneRect = $(".plane-x").getBoundingClientRect();
@@ -153,13 +157,13 @@ class Lego {
     }
 
     // console.log(`coords: ${this.zPlaneCell}, ${this.zPlaneRow}`);
-    // if (this.isCollision()) {
-      // console.log("collision!");
-    // } else {
+    if (this.isCollision()) {
+      console.log("collision!");
+    } else {
       this.elem.style[styleProp] = style;
       $$('.plane-x .cell.active').forEach( cell => {cell.className = cell.className.replace("active", "");});
       $(`.plane-x .row-${this.zPlaneRow} .cell-${this.zPlaneCell}`).className += " active";
-    // }
+    }
   }
 
   // Given the axis and mouse pos., get the coordinate the lego should be placed at for the given axis
@@ -248,7 +252,7 @@ class Lego {
 
   place() {
     try {
-      var landingCell = $(`.plane-x .row-${this.zPlaneRow} .cell-${this.zPlaneCell}`)
+      var landingCell = this.getCell();
       var currStackSize = landingCell['currStackSize'] || 0;
 
       landingCell['currStackSize'] = currStackSize + 1;
@@ -264,8 +268,15 @@ class Lego {
     }
   }
 
+  unplace() {
+    var landingCell = this.getCell();
+    if (landingCell['currStackSize']) {
+      landingCell['currStackSize'] = landingCell['currStackSize'] - 1;
+    }
+  }
+
   isCollision() {
-    var landingCell = $(`.plane-x .row-${this.zPlaneRow} .cell-${this.zPlaneCell}`)
+    var landingCell = this.getCell();
     var currStackSize = landingCell['currStackSize'] || 0;
     return (currStackSize > this.zPlaneHeight);
   }
