@@ -7,6 +7,9 @@ $lego-orange: #ff7c0a;
 $lego-red: #f8272a;
 $lego-purple: #f34ed0;
 
+$lego-names-colors: (blue: $lego-blue, green: $lego-green, yellow: $lego-yellow, orange: $lego-orange, red: $lego-red, purple: $lego-purple);
+
+
 // Units
 $normal-font-size: 16px;
 // $rem: 39.6px;
@@ -98,13 +101,9 @@ body {margin: 0;}
     &.right {transform-origin: right; transform: rotateY(-90deg);}
   }
 
-  // TODO sass w/interpolate
-  &.blue > div {background-color: $lego-blue; border: 1px solid darken($lego-blue, 10%);}
-  &.green > div {background-color: $lego-green; border: 1px solid darken($lego-green, 10%);}
-  &.yellow > div {background-color: $lego-yellow; border: 1px solid darken($lego-yellow, 10%);}
-  &.orange > div {background-color: $lego-orange; border: 1px solid darken($lego-orange, 10%);}
-  &.red > div {background-color: $lego-red; border: 1px solid darken($lego-red, 10%);}
-  &.purple > div {background-color: $lego-purple; border: 1px solid darken($lego-purple, 10%);}
+  @each $color-name, $color-value in $lego-names-colors {
+    &.#{$color-name} > div {background-color: $color-value; border: 1px solid darken($color-value, 10%);}
+  }
 }
 
 %details {width: 66%; max-width: 800px; margin-left: auto; margin-right: auto;}
@@ -126,13 +125,9 @@ body {margin: 0;}
       &:before {left: .1rem;}
       &:after {right: .1rem;}
 
-      // TODO sass w/interpolate
-      &.blue, &.blue:before, &.blue:after {@include lego-pile($lego-blue);}
-      &.green, &.green:before, &.green:after {@include lego-pile($lego-green);}
-      &.yellow, &.yellow:before, &.yellow:after {@include lego-pile($lego-yellow);}
-      &.orange, &.orange:before, &.orange:after {@include lego-pile($lego-orange);}
-      &.red, &.red:before, &.red:after {@include lego-pile($lego-red);}
-      &.purple, &.purple:before, &.purple:after {@include lego-pile($lego-purple);}
+      @each $color-name, $color-value in $lego-names-colors {
+        &.#{$color-name}, &.#{$color-name}:before, &.#{$color-name}:after {@include lego-pile($color-value);}
+      }
   }
 }
 
