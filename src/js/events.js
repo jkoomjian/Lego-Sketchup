@@ -6,68 +6,22 @@ var lastMouseCoords = [];
 
 
 //---------- Pointer State ------------
-function setPrefixedCursorStyle(style) {
-  document.body.style.cursor = `-webkit-${style}`;
-  document.body.style.cursor = `-moz-${style}`;
-}
 
 function updatePointerState() {
-
   if (ctrlKeyDown || shiftKeyDown) {
 
     if (mouseBtnDown) {
-      setPrefixedCursorStyle("grabbing");
+      Utils.setPrefixedCursorStyle("grabbing");
     } else {
-      setPrefixedCursorStyle("grab");
+      Utils.setPrefixedCursorStyle("grab");
     }
 
   } else if (mouseMiddleBtnDown) {
-    setPrefixedCursorStyle("grabbing");
+    Utils.setPrefixedCursorStyle("grabbing");
   } else {
     // default
     document.body.style.cursor = "default";
   }
-}
-
-// Rotate the lego space
-function orbitLegoSpace(startCoords, endCoords) {
-  var t = new Transform( $("#lego-space").style.transform );
-  var magicNumber = .2;  //how much should the axis rotate for a given distance mouse movement
-  var existingDegX = t.getPropValueInDegree("rotateX");
-  var existingDegY = t.getPropValueInDegree("rotateY");
-  var xDeg = Math.round((endCoords[0] - startCoords[0]) * magicNumber) + existingDegY;
-  var yDeg = Math.round((endCoords[1] - startCoords[1]) * -1 * magicNumber) + existingDegX;
-  t.transform["rotateX"] = yDeg + "deg";
-  t.transform["rotateY"] = xDeg + "deg";
-  $("#lego-space").style.transform = t.toString();
-}
-
-function panLegoSpace(startCoords, endCoords) {
-  var t = new Transform( $("#lego-space").style.transform );
-  var magicNumber = 1;
-  var translateY = parseInt(t.transform.translateY || 0, 10);
-  var translateX = parseInt(t.transform.translateX || 0, 10);
-  var xDist = Math.round((endCoords[0] - startCoords[0]) * magicNumber) + translateX;
-  var yDist = Math.round((endCoords[1] - startCoords[1]) * magicNumber) + translateY;
-  t.transform["translateX"] = xDist + "px";
-  t.transform["translateY"] = yDist + "px";
-  $("#lego-space").style.transform = t.toString();
-}
-
-function zoom(zoomAmt){
-  var t = new Transform($("#lego-space").style.transform)
-  var magicNumber = .001; //amount to increase scale by
-  var baseScale = 1;
-
-  if (t.transform["scale3d"]){
-    baseScale = t.transform["scale3d"];
-    baseScale = baseScale.split(",")[0].trim();
-    baseScale = parseFloat(baseScale);
-  }
-
-  var newScale = (magicNumber * zoomAmt) + baseScale;
-  t.transform["scale3d"] = `${newScale}, ${newScale}, ${newScale}`;
-  $("#lego-space").style.transform = t.toString();
 }
 
 //---------- Key events ------------
@@ -81,10 +35,10 @@ function keyDown(event) {
       shiftKeyDown = true;
       break;
     case 187: //+
-      zoom(120);
+      legoSpace.zoom(120);
       break;
     case 189: //-
-      zoom(-120);
+      legoSpace.zoom(-120);
       break;
   }
 
@@ -119,13 +73,13 @@ function mouseUp(event) {
 function mouseMove(event) {
   var action;
   // orbit
-  if ((ctrlKeyDown && mouseBtnDown) || mouseMiddleBtnDown) action = orbitLegoSpace;
+  if ((ctrlKeyDown && mouseBtnDown) || mouseMiddleBtnDown) action = legoSpace.orbit;
   // pan
-  if (shiftKeyDown && mouseBtnDown) action = panLegoSpace;
+  if (shiftKeyDown && mouseBtnDown) action = legoSpace.pan;
 
   if (action) {
     var currMouseCoords = [event.clientX, event.clientY];
-    executeOnGreatEnoughChange(event.clientX, event.clientY, 10, 'mouseMove', function() {
+    Utils.executeOnGreatEnoughChange(event.clientX, event.clientY, 10, 'mouseMove', function() {
       action(lastMouseCoords, currMouseCoords);
       lastMouseCoords = currMouseCoords;
     });
@@ -134,7 +88,7 @@ function mouseMove(event) {
 }
 
 function wheelMove(event) {
-  zoom(event.wheelDelta);
+  legoSpace.zoom(event.wheelDelta);
   event.preventDefault();
 }
 
@@ -151,5 +105,5 @@ function initEventHandlers() {
   window.addEventListener("mousemove", mouseMove);
   $("#lego-space").addEventListener("wheel", wheelMove);
   initializeDrag();
-  // addHandlers(".plane-x .cell", "mouseover", onMouseOver);
+  // Utils.addHandlers(".plane-x .cell", "mouseover", onMouseOver);
 }

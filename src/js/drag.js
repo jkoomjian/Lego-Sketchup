@@ -20,7 +20,7 @@ function _onDragStartCommon(event) {
 }
 
 function onDrag(event) {
-  executeOnGreatEnoughChange(event.clientX, event.clientY, 30, 'dragLego', function(mouseChangeAmount) {
+  Utils.executeOnGreatEnoughChange(event.clientX, event.clientY, 30, 'dragLego', function(mouseChangeAmount) {
     // At mouse end mouse coords go off to the side
     if (mouseChangeAmount < 200) {
       lego.drag(event.clientX, event.clientY);
@@ -34,8 +34,8 @@ function onDragEnd(event) {
 }
 
 function initializeDrag() {
-  addHandlers(".lego-pile", "dragstart", onDragStart);
-  addHandlers(".lego-pile", "drag", onDrag);
-  addHandlers(".lego-pile", "dragend", onDragEnd);
+  Utils.addHandlers(".lego-pile", "dragstart", onDragStart);
+  Utils.addHandlers(".lego-pile", "drag", onDrag);
+  Utils.addHandlers(".lego-pile", "dragend", onDragEnd);
 }
 

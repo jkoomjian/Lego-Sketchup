@@ -22,17 +22,18 @@ gulp.task('sass', () => {
 });
 
 gulp.task('js', () => {
-  var jsFiles = ['src/js/main.js', "src/js/lego_space.js", 'src/js/planes.js', 'src/js/lego.js',
-                  'src/js/mouse_path.js',
-                  'src/js/events.js', 'src/js/drag.js', 'src/js/transform.js'];
-  var allJs = jsFiles.slice(0)
+  var jsFiles = ['env.js', "lego_space.js", 'plane.js', 'lego.js',
+                  'mouse_path.js', 'utils.js',
+                  'events.js', 'drag.js', 'transform.js'];
+  var jsPaths = jsFiles.map( f => 'src/js/' + f);
+  var allJs = jsPaths.slice(0);
   allJs.push('src/js/start.js');
   gulp.src(allJs)
-  .pipe(babel( {presets: ['es2015']} ))
+  // .pipe(babel( {presets: ['es2015']} ))
   .pipe(concat('main.js'))
   .pipe(gulp.dest('dist'));
 
-  gulp.src(jsFiles)
+  gulp.src(jsPaths)
   .pipe(babel( {presets: ['es2015']} ))
   .pipe(concat('main-test.js'))
   .pipe(gulp.dest('dist'));

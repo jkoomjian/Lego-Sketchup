@@ -1,8 +1,8 @@
 describe("Calculate Angle", function() {
 
   it("should return the correct angle", function() {
-    expect( calculateAngle(1, 1) ).toEqual(45);
-    expect( Math.round(calculateAngle(400, 300)) ).toEqual(37);
+    expect( Utils.calculateAngle(1, 1) ).toEqual(45);
+    expect( Math.round(Utils.calculateAngle(400, 300)) ).toEqual(37);
   });
 
 });
@@ -26,6 +26,6 @@ describe("Transform class", function() {
 
 describe("Utils", function() {
   it("should calculate distance", function() {
-    expect( calcDistance(645, 270, 672, 96) ).toEqual( 176 );
+    expect( Utils.calcDistance(645, 270, 672, 96) ).toEqual( 176 );
   });
 });

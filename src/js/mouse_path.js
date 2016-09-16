@@ -11,7 +11,7 @@ class MousePath {
   static getAxisOrientation(axis) {
     var axisElem = $(`.axis-${axis}`);
     let rect = axisElem.getBoundingClientRect();
-    let angle = calculateAngle(rect.right - rect.left, rect.bottom - rect.top);
+    let angle = Utils.calculateAngle(rect.right - rect.left, rect.bottom - rect.top);
     console.log("angle: " + angle);
     return (angle > 45) ? 'tb' : 'lr';
   }
@@ -22,13 +22,13 @@ class MousePath {
   // closest to the mouse movement
   getAxisClosestsToMovement(eventX, eventY) {
 
-    let mouseAngle = calculateAngle(eventX - this.lastClientX, eventY - this.lastClientY);
+    let mouseAngle = Utils.calculateAngle(eventX - this.lastClientX, eventY - this.lastClientY);
     let closest = [];
 
     //get the axis angles
     $$(".axis").forEach( axis => {
       let rect = axis.getBoundingClientRect()
-      let angle = calculateAngle(rect.right - rect.left, rect.bottom - rect.top);
+      let angle = Utils.calculateAngle(rect.right - rect.left, rect.bottom - rect.top);
       let axisName = axis.className.match(/axis-([xyz])/i)[1];
       // console.log(`axis: ${axisName} angle: ${angle} top: ${rect.top} bottom: ${rect.bottom} left: ${rect.left} right: ${rect.right}`);
       closest.push([axisName, angle, Math.abs(mouseAngle - angle)]);
@@ -83,10 +83,10 @@ class MousePath {
     var startCellRect = startCellPlane.getBoundingClientRect();
     var endCellRect = endCellPlane.getBoundingClientRect();
     //assumes plane is not rotated 180deg
-    var totalLineDist = calcDistance(startCellRect.left, startCellRect.top, endCellRect.right, endCellRect.bottom)
+    var totalLineDist = Utils.calcDistance(startCellRect.left, startCellRect.top, endCellRect.right, endCellRect.bottom)
 
     // Calculate distance between end and mouse coords
-    var partialLineDist = calcDistance(eventXScreen, eventYScreen, startCellRect.left, startCellRect.top);
+    var partialLineDist = Utils.calcDistance(eventXScreen, eventYScreen, startCellRect.left, startCellRect.top);
     var coordDist = partialLineDist / totalLineDist;
     coordDist = Math.floor(coordDist * 10);
 
