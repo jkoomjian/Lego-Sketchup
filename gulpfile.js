@@ -44,7 +44,7 @@ gulp.task('html', () => {
     .pipe(gulp.dest('dist'));
 });
 
-gulp.task('watch', () => {
+gulp.task('watch', ['default'], () => {
   gulp.watch(['src/*.scss'], ['sass']);
   gulp.watch(['src/js/*.js'], ['js']);
   gulp.watch(['src/*.html'], ['html']);
