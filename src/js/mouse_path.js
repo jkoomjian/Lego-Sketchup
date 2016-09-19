@@ -63,50 +63,60 @@ class MousePath {
     return axis;
   }
 
-  getCoordForAxis2(axis, eventXScreen, eventYScreen, positioningProperty) {
+  getCoordForAxis2(axis, eventXScreen, eventYScreen, positioningProperty, xPlaneRow, xPlaneCell) {
     var startCellPlane, endCellPlane, startEdgePositioning;
     console.log("axis: " + axis);
 
+    var [currCell, xPlaneCell, xPlaneRow] = Utils.getCellAtCoords(eventXScreen, eventYScreen);
+    
     // Get the cells at the start and end of the line the lego is moving along
     if (axis == "z") {
-      startCellPlane = $(`.plane-x .row-0 .cell-${this.xPlaneCell}`);
-      endCellPlane = $(`.plane-x .row-9 .cell-${this.xPlaneCell}`);
+      startCellPlane = $(`.plane-x .row-9 .cell-${xPlaneCell}`);
+      endCellPlane = $(`.plane-x .row-0 .cell-${xPlaneCell}`);
     } else {
-      startCellPlane = $(`.plane-x .row-${this.xPlaneRow} .cell-0`);
-      endCellPlane = $(`.plane-x .row-${this.xPlaneRow} .cell-9`);
+      startCellPlane = $(`.plane-x .row-${xPlaneRow} .cell-0`);
+      endCellPlane = $(`.plane-x .row-${xPlaneRow} .cell-9`);
     }
 
-    var orientation = MousePath.getAxisOrientation(axis);
-    startEdgePositioning = orientation == 'lr' ? 'left' : 'top';
+    // Place a dot at the point where the leangth measurements should be made from (top|left|bottom|right middle)
+    var startPoint = this.placePointOnCell(startCellPlane, positioningProperty);
+    var endPoint = this.placePointOnCell(endCellPlane, Utils.getOpposingPosition(positioningProperty));
+    var mousePoint = this.placePoint(document.body, {left: eventXScreen+"px", top: eventYScreen+"px", position: 'fixed'});
 
     // Calculate the distance of the line, from start to finish
-    var startCellRect = startCellPlane.getBoundingClientRect();
-    var endCellRect = endCellPlane.getBoundingClientRect();
-    //assumes plane is not rotated 180deg
-    var totalLineDist = Utils.calcDistance(startCellRect.left, startCellRect.top, endCellRect.right, endCellRect.bottom)
+    var startRect = startPoint.getBoundingClientRect();
+    var endRect = endPoint.getBoundingClientRect();
 
     // Calculate distance between end and mouse coords
-    var partialLineDist = Utils.calcDistance(eventXScreen, eventYScreen, startCellRect.left, startCellRect.top);
+    var totalLineDist = Utils.calcDistance(startRect.left, startRect.top, endRect.right, endRect.bottom)
+    var partialLineDist = Utils.calcDistance(eventXScreen, eventYScreen, startRect.left, startRect.top);
     var coordDist = partialLineDist / totalLineDist;
     coordDist = Math.floor(coordDist * 10);
+
+    // delete points
+    startPoint.remove();
+    endPoint.remove();
+    mousePoint.remove();
 
     if (coordDist < 0) coordDist = 0;
     if (coordDist > 9) coordDist = 9;
 
-    var reverse = this._shouldReverse('.plane-x', startCellRect[startEdgePositioning], startEdgePositioning, positioningProperty)
-    if (reverse) coordDist = 9 - coordDist;
-
     return coordDist;
-    // if (mousePosScreen + yHeight < startEdgeScreen) {
-    //   coordOnAxis = startEdgePlane;
-    // } else if (mousePosScreen + yHeight > endEdgeScreen){
-    //   coordOnAxis = endEdgePlane;
-    // } else {
-    //   coordOnAxis = (mouseDistFromStartEdgeScreen + yHeight) / planeWidthScreen;
-    //   coordOnAxis = Math.floor(coordOnAxis * 10);
-    //   if (reverse) coordOnAxis = startEdgePlane - coordOnAxis;
-    // }
+  }
 
+  placePointOnCell(cell, positioningProperty) {
+    var css = {};
+    css[positioningProperty] = "0";
+    css[Utils.getAdjacentPosition(positioningProperty)] = "50%";
+    return this.placePoint(cell, css);
+  }
+
+  placePoint(parent, css) {
+    var div = document.createElement("div");
+    div.className = "point";
+    div.css(css);
+    parent.appendChild(div);
+    return div;
   }
 
   // Given the axis and mouse pos., get the coordinate the lego should be placed at for the given axis

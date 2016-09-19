@@ -48,14 +48,14 @@ class Lego {
 
     // Z
     if (axis.includes('z')) {
-      coord = this.mousePath.getCoordForAxis('z', eventX, eventY, "top");
+      coord = this.mousePath.getCoordForAxis2('z', eventX, eventY, "top");
       this.xPlaneRow = 9 - coord;
       updateLocation("top", coord + "rem", coord);
     }
 
     // X
     if (axis.includes('x')) {
-      coord = this.mousePath.getCoordForAxis('x', eventX, eventY, "left");
+      coord = this.mousePath.getCoordForAxis2('x', eventX, eventY, "left");
       this.xPlaneCell = coord;
       updateLocation("left", coord + "rem", coord);
     }

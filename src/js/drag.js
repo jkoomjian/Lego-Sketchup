@@ -23,6 +23,7 @@ function onDrag(event) {
   Utils.executeOnGreatEnoughChange(event.clientX, event.clientY, 30, 'dragLego', function(mouseChangeAmount) {
     // At mouse end mouse coords go off to the side
     if (mouseChangeAmount < 200) {
+      //console.log(`at drag: x: ${event.clientX} y: ${event.clientY} yOffset: ${lego.offsetY}`);
       lego.drag(event.clientX, event.clientY);
     }
   });

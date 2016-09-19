@@ -60,4 +60,42 @@ class Utils {
     Utils.setPrefixedStyle('cursor', styleVal);
   }
 
+  static getOpposingPosition(position) {
+    var opposingPositions = {top: "bottom", bottom: "top", left: "right", left: "right"};
+    return opposingPositions[position];
+  }
+
+  static getAdjacentPosition(position) {
+    var adjacentPositions = {top: "left", bottom: "left", left: "top", right: "top"};
+    return adjacentPositions[position];
+  }
+
+  /*------- Screen ---------*/
+  //returns the cell, cell id, row id
+  static getCellAtCoords(eventXScreen, eventYScreen) {
+    var currCell = document.elementFromPoint(eventXScreen, eventYScreen);
+
+    //sometimes gets rows
+    for(let i=0; i<5; i++) {
+      if (currCell.className.match(/row/)) {
+        eventYScreen -= 1; // -1 from y to avoid landing on the row border
+        currCell = document.elementFromPoint(eventXScreen, eventYScreen);
+      } else {
+        break;
+      }
+    }
+
+    //verify a cell
+    if (!currCell.className.match(/cell/)) {
+      console.log("not at cell");
+      console.dir(currCell);
+      throw new Error("Unable to find cell");
+    }
+
+    //currCell.style.backgroundColor = "yellow";
+    var xPlaneCell = currCell.className.match(/cell-(\d+)/)[1]
+    var xPlaneRow = currCell.parentNode.className.match(/row-(\d+)/)[1]
+    return [currCell, xPlaneCell, xPlaneRow];
+  }
+
 }
