@@ -13,8 +13,7 @@ class Lego {
     $(".plane-x").appendChild(this.elem);
 
     //set the color
-    var color = sourceLegoPile.className.split(" ")[1]
-      this.elem.className += " " + color;
+    this.elem.classList.add( sourceLegoPile.classList[1] );
   }
 
   getCell() {
@@ -30,8 +29,8 @@ class Lego {
         console.log("collision!");
       } else {
         that.elem.style[styleProp] = styleVal;
-        $$('.plane-x .cell.active').forEach( cell => {cell.className = cell.className.replace("active", "");});
-        that.getCell().className += " active";
+        $$('.plane-x .cell.active').forEach( cell => {cell.classList.remove("active");});
+        that.getCell().classList.add("active");
         console.log(`drag ${coord}rem ${styleProp}`);
       }
     }
