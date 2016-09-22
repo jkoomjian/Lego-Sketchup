@@ -63,12 +63,13 @@ class MousePath {
     return axis;
   }
 
-  getCoordForAxis2(axis, eventXScreen, eventYScreen, positioningProperty, xPlaneRow, xPlaneCell) {
+  getCoordForAxis2(axis, eventXScreen, eventYScreen, positioningProperty, xPlaneHeight) {
     var startCellPlane, endCellPlane, startEdgePositioning;
     console.log("axis: " + axis);
+    eventYScreen = eventYScreen + xPlaneHeight;
 
     var [currCell, xPlaneCell, xPlaneRow] = Utils.getCellAtCoords(eventXScreen, eventYScreen);
-    
+
     // Get the cells at the start and end of the line the lego is moving along
     if (axis == "z") {
       startCellPlane = $(`.plane-x .row-9 .cell-${xPlaneCell}`);

@@ -75,24 +75,26 @@ class Utils {
   static getCellAtCoords(eventXScreen, eventYScreen) {
     var currCell = document.elementFromPoint(eventXScreen, eventYScreen);
 
-    //sometimes gets rows
-    for(let i=0; i<5; i++) {
-      if (currCell.className.match(/row/)) {
-        eventYScreen -= 1; // -1 from y to avoid landing on the row border
+    if (!currCell) throw new Error("Unable to locate cell");
+
+    //sometimes gets rows or legospace
+    for(let i=0; i<10; i++) {
+      if (!currCell.className.match(/cell/)) {
+        eventYScreen -= (i * 5); // - some amount from y to avoid landing on the row border, or lego face
         currCell = document.elementFromPoint(eventXScreen, eventYScreen);
       } else {
         break;
       }
     }
 
-    //verify a cell
-    if (!currCell.className.match(/cell/)) {
+    //verify a cell //would be better to use jquery's parents()
+    if (!currCell.className.match(/cell/) || !currCell.parentNode.parentNode.className.match(/plane-x/)) {
       console.log("not at cell");
       console.dir(currCell);
       throw new Error("Unable to find cell");
     }
 
-    //currCell.style.backgroundColor = "yellow";
+    // currCell.style.backgroundColor = "yellow";
     var xPlaneCell = currCell.className.match(/cell-(\d+)/)[1]
     var xPlaneRow = currCell.parentNode.className.match(/row-(\d+)/)[1]
     return [currCell, xPlaneCell, xPlaneRow];

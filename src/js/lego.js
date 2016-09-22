@@ -47,16 +47,24 @@ class Lego {
 
     // Z
     if (axis.includes('z')) {
-      coord = this.mousePath.getCoordForAxis2('z', eventX, eventY, "top");
-      this.xPlaneRow = 9 - coord;
-      updateLocation("top", coord + "rem", coord);
+      try {
+        coord = this.mousePath.getCoordForAxis2('z', eventX, eventY, "top", this.getYHeight());
+        this.xPlaneRow = 9 - coord;
+        updateLocation("top", coord + "rem", coord);
+      } catch(ex) {
+        return;
+      }
     }
 
     // X
     if (axis.includes('x')) {
-      coord = this.mousePath.getCoordForAxis2('x', eventX, eventY, "left");
-      this.xPlaneCell = coord;
-      updateLocation("left", coord + "rem", coord);
+      try {
+        coord = this.mousePath.getCoordForAxis2('x', eventX, eventY, "left", this.getYHeight());
+        this.xPlaneCell = coord;
+        updateLocation("left", coord + "rem", coord);
+      } catch(ex) {
+        return;
+      }
     }
 
     // Y //TODO update this to use getCoordForAxis
@@ -82,6 +90,13 @@ class Lego {
     }
 
     // console.log(`coords: ${this.xPlaneCell}, ${this.xPlaneRow}`);
+  }
+
+  //return the height of this lego, in px, above the x plane
+  getYHeight() {
+    var yPlaneRect = $(".plane-y").getBoundingClientRect();
+    var yPlaneHeight = yPlaneRect.bottom - yPlaneRect.top;
+    return this.xPlaneHeight * .1 * yPlaneHeight;
   }
 
   place() {
