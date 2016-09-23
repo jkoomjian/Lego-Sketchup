@@ -35,6 +35,7 @@ class LegoSpace {
   }
 
   zoom(zoomAmt){
+    zoomAmt = zoomAmt < 0 ? -120 : 120;
     var t = new Transform($("#lego-space").style.transform)
     var magicNumber = .001; //amount to increase scale by
     var baseScale = 1;

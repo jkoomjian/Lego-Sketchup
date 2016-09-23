@@ -34,10 +34,10 @@ function keyDown(event) {
     case 16:
       shiftKeyDown = true;
       break;
-    case 187: //+
+    case 187, 61: //+
       legoSpace.zoom(120);
       break;
-    case 189: //-
+    case 189, 173: //-
       legoSpace.zoom(-120);
       break;
   }
@@ -88,7 +88,7 @@ function mouseMove(event) {
 }
 
 function wheelMove(event) {
-  legoSpace.zoom(event.wheelDelta);
+  legoSpace.zoom(event.deltaY);
   event.preventDefault();
 }
 
