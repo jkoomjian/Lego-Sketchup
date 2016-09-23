@@ -1,4 +1,5 @@
-var lego;
+var lego, currClientX, currClientY;
+
 function onDragStart(event) {
   console.log("start drag!");
   //create a new lego
@@ -15,16 +16,19 @@ function onDragStartExistingLego(event) {
 }
 
 function _onDragStartCommon(event) {
+  event.dataTransfer.setData('text/plain',null); //required for FF
   event.dataTransfer.dropEffect = "copy";
   event.dataTransfer.setDragImage($("#empty"), 0, 0);
 }
 
 function onDrag(event) {
-  Utils.executeOnGreatEnoughChange(event.clientX, event.clientY, 30, 'dragLego', function(mouseChangeAmount) {
+  var clientX = event.clientX || currClientX || 0;
+  var clientY = event.clientY || currClientY || 0;
+  Utils.executeOnGreatEnoughChange(clientX, clientY, 30, 'dragLego', function(mouseChangeAmount) {
     // At mouse end mouse coords go off to the side
     if (mouseChangeAmount < 200) {
-      //console.log(`at drag: x: ${event.clientX} y: ${event.clientY} yOffset: ${lego.offsetY}`);
-      lego.drag(event.clientX, event.clientY);
+      //console.log(`at drag: x: ${clientX} y: ${clientY} yOffset: ${lego.offsetY}`);
+      lego.drag(clientX, clientY);
     }
   });
 }
@@ -38,5 +42,10 @@ function initializeDrag() {
   Utils.addHandlers(".lego-pile", "dragstart", onDragStart);
   Utils.addHandlers(".lego-pile", "drag", onDrag);
   Utils.addHandlers(".lego-pile", "dragend", onDragEnd);
+  //Hack for FF
+  document.addEventListener("dragover", function(event) {
+    currClientX = event.clientX;
+    currClientY = event.clientY;
+  });
 }
 
