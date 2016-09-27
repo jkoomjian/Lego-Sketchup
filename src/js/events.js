@@ -34,10 +34,12 @@ function keyDown(event) {
     case 16:
       shiftKeyDown = true;
       break;
-    case 187, 61: //+
+    case 187: //+
+    case 61:
       legoSpace.zoom(120);
       break;
-    case 189, 173: //-
+    case 189: //-
+    case 173:
       legoSpace.zoom(-120);
       break;
   }
